@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - ProTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('_navbar') %>
+
+    <main>
+        <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-1">Productivity Reports</h1>
+                        <p class="text-muted mb-0">Track your task completion progress over time</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="downloadReport()">
+                            <i class="fas fa-download me-2"></i>
+                            Download PDF
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="toggleChartTheme()">
+                            <i class="fas fa-moon me-2"></i>
+                            Dark Theme
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Period Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <label for="periodSelect" class="form-label fw-bold">Report Period:</label>
+                                <select class="form-select" id="periodSelect" onchange="changePeriod()">
+                                    <option value="daily" <%= period === 'daily' ? 'selected' : '' %>>Today</option>
+                                    <option value="weekly" <%= period === 'weekly' ? 'selected' : '' %>>Last 7 Days</option>
+                                    <option value="monthly" <%= period === 'monthly' ? 'selected' : '' %>>Last 30 Days</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <%= new Date(startDate).toLocaleDateString() %> - <%= new Date(endDate).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Completed</h6>
+                                <h3 class="mb-0"><%= summary.total_completed %></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Productive Days</h6>
+                                <h3 class="mb-0"><%= summary.productive_days %></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calendar-check fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Avg. Per Day</h6>
+                                <h3 class="mb-0">
+                                    <%= summary.productive_days > 0 ? (summary.total_completed / summary.productive_days).toFixed(1) : '0' %>
+                                </h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Best Day</h6>
+                                <h3 class="mb-0"><%= mostProductive.count %></h3>
+                                <small><%= mostProductive.date ? new Date(mostProductive.date).toLocaleDateString() : 'N/A' %></small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-trophy fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Task Completion Trend
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:400px;">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Productivity Insights
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Summary</h6>
+                                <p class="text-muted">
+                                    You completed <strong><%= summary.total_completed %></strong> tasks 
+                                    <% if (period === 'daily') { %>
+                                        today.
+                                    <% } else if (period === 'weekly') { %>
+                                        in the last 7 days.
+                                    <% } else { %>
+                                        in the last 30 days.
+                                    <% } %>
+                                </p>
+                                <% if (summary.productive_days > 0) { %>
+                                    <p class="text-muted">
+                                        You were productive on <strong><%= summary.productive_days %></strong> days, 
+                                        averaging <strong><%= (summary.total_completed / summary.productive_days).toFixed(1) %></strong> tasks per productive day.
+                                    </p>
+                                <% } %>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-success">Recommendations</h6>
+                                <ul class="text-muted">
+                                    <% if (summary.total_completed === 0) { %>
+                                        <li>Start with small, achievable tasks to build momentum</li>
+                                        <li>Set specific time blocks for focused work</li>
+                                    <% } else if (summary.total_completed < 5) { %>
+                                        <li>Great start! Try to maintain this consistency</li>
+                                        <li>Consider breaking larger tasks into smaller ones</li>
+                                    <% } else { %>
+                                        <li>Excellent productivity! Keep up the great work</li>
+                                        <li>Consider setting more challenging goals</li>
+                                    <% } %>
+                                    <li>Review your most productive days to identify patterns</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('_footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let reportChart;
+        let isDarkTheme = false;
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            const chartData = JSON.parse('<%- chartData %>');
+            
+            const config = {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(item => item.date),
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: chartData.map(item => item.count),
+                        backgroundColor: isDarkTheme ? 'rgba(54, 162, 235, 0.8)' : 'rgba(13, 110, 253, 0.8)',
+                        borderColor: isDarkTheme ? 'rgba(54, 162, 235, 1)' : 'rgba(13, 110, 253, 1)',
+                        borderWidth: 2,
+                        borderRadius: 4,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: isDarkTheme ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+                            titleColor: isDarkTheme ? '#fff' : '#000',
+                            bodyColor: isDarkTheme ? '#fff' : '#000',
+                            borderColor: isDarkTheme ? '#333' : '#ddd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Tasks: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: isDarkTheme ? '#fff' : '#666'
+                            },
+                            grid: {
+                                color: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: isDarkTheme ? '#fff' : '#666'
+                            },
+                            grid: {
+                                color: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (reportChart) {
+                reportChart.destroy();
+            }
+
+            reportChart = new Chart(ctx, config);
+        }
+
+        // Change period
+        function changePeriod() {
+            const period = document.getElementById('periodSelect').value;
+            window.location.href = `/reports?period=${period}`;
+        }
+
+        // Toggle chart theme
+        function toggleChartTheme() {
+            isDarkTheme = !isDarkTheme;
+            const btn = event.target.closest('button');
+            const icon = btn.querySelector('i');
+            
+            if (isDarkTheme) {
+                icon.className = 'fas fa-sun me-2';
+                btn.innerHTML = '<i class="fas fa-sun me-2"></i>Light Theme';
+                document.body.classList.add('dark-theme');
+            } else {
+                icon.className = 'fas fa-moon me-2';
+                btn.innerHTML = '<i class="fas fa-moon me-2"></i>Dark Theme';
+                document.body.classList.remove('dark-theme');
+            }
+            
+            initChart();
+        }
+
+        // Download report as PDF
+        function downloadReport() {
+            const period = document.getElementById('periodSelect').value;
+            window.open(`/reports/download/pdf?period=${period}`, '_blank');
+        }
+
+        // Initialize chart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+        });
+    </script>
+</body>
+</html> 

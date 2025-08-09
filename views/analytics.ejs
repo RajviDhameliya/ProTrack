@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - ProTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+    <%- include('_navbar') %>
+
+    <main>
+        <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-1">Productivity Analytics</h1>
+                        <p class="text-muted mb-0">Track your progress over the last 7 days</p>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" onclick="showWeeklyChart()">
+                            <i class="fas fa-calendar-week me-1"></i>
+                            Weekly
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showMonthlyChart()">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Monthly
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Completed</h6>
+                                <h3 class="mb-0" id="totalCompleted">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Best Day</h6>
+                                <h3 class="mb-0" id="bestDay">-</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-trophy fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Average/Day</h6>
+                                <h3 class="mb-0" id="averagePerDay">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Consistency</h6>
+                                <h3 class="mb-0" id="consistency">0%</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-bullseye fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Weekly Productivity Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:400px;">
+                            <canvas id="productivityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Section -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Productivity Insights
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="insights">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Loading insights...</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-target me-2"></i>
+                            Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recommendations">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>Analyzing your patterns...</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('_footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Chart data from server
+        const chartData = <%- chartData %>;
+        
+        // Initialize chart
+        let productivityChart;
+        
+        function initializeChart() {
+            const ctx = document.getElementById('productivityChart').getContext('2d');
+            
+            productivityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(item => item.date),
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: chartData.map(item => item.count),
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            cornerRadius: 5,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Tasks completed: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: '#666'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#666'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Calculate statistics
+        function calculateStats() {
+            const counts = chartData.map(item => item.count);
+            const totalCompleted = counts.reduce((sum, count) => sum + count, 0);
+            const averagePerDay = totalCompleted / 7;
+            const bestDayCount = Math.max(...counts);
+            const bestDayIndex = counts.indexOf(bestDayCount);
+            const bestDay = chartData[bestDayIndex]?.date || '-';
+            const consistency = ((counts.filter(count => count > 0).length / 7) * 100).toFixed(0);
+
+            // Update statistics cards
+            document.getElementById('totalCompleted').textContent = totalCompleted;
+            document.getElementById('averagePerDay').textContent = averagePerDay.toFixed(1);
+            document.getElementById('bestDay').textContent = bestDay;
+            document.getElementById('consistency').textContent = consistency + '%';
+
+            return {
+                totalCompleted,
+                averagePerDay,
+                bestDay,
+                consistency,
+                counts
+            };
+        }
+
+        // Generate insights
+        function generateInsights(stats) {
+            const insights = [];
+            
+            if (stats.totalCompleted === 0) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'exclamation-triangle',
+                    title: 'No tasks completed this week',
+                    message: 'Start by adding and completing your first task to see your productivity patterns.'
+                });
+            } else {
+                if (stats.averagePerDay >= 3) {
+                    insights.push({
+                        type: 'success',
+                        icon: 'star',
+                        title: 'Excellent productivity!',
+                        message: `You're averaging ${stats.averagePerDay.toFixed(1)} tasks per day. Keep up the great work!`
+                    });
+                } else if (stats.averagePerDay >= 1) {
+                    insights.push({
+                        type: 'info',
+                        icon: 'thumbs-up',
+                        title: 'Good progress',
+                        message: `You're averaging ${stats.averagePerDay.toFixed(1)} tasks per day. Consider increasing your daily goals.`
+                    });
+                } else {
+                    insights.push({
+                        type: 'warning',
+                        icon: 'lightbulb',
+                        title: 'Room for improvement',
+                        message: `You're averaging ${stats.averagePerDay.toFixed(1)} tasks per day. Try setting smaller, more achievable goals.`
+                    });
+                }
+
+                if (stats.consistency >= 80) {
+                    insights.push({
+                        type: 'success',
+                        icon: 'calendar-check',
+                        title: 'High consistency',
+                        message: `${stats.consistency}% of days had completed tasks. You're building great habits!`
+                    });
+                } else if (stats.consistency >= 50) {
+                    insights.push({
+                        type: 'info',
+                        icon: 'calendar',
+                        title: 'Moderate consistency',
+                        message: `${stats.consistency}% of days had completed tasks. Try to maintain daily activity.`
+                    });
+                } else {
+                    insights.push({
+                        type: 'warning',
+                        icon: 'calendar-times',
+                        title: 'Low consistency',
+                        message: `${stats.consistency}% of days had completed tasks. Focus on daily task completion.`
+                    });
+                }
+            }
+
+            return insights;
+        }
+
+        // Generate recommendations
+        function generateRecommendations(stats) {
+            const recommendations = [];
+            
+            if (stats.totalCompleted === 0) {
+                recommendations.push({
+                    icon: 'plus-circle',
+                    title: 'Start Small',
+                    message: 'Begin with just one task per day to build momentum.'
+                });
+                recommendations.push({
+                    icon: 'clock',
+                    title: 'Set Reminders',
+                    message: 'Use the reminder system to stay on track with your tasks.'
+                });
+            } else {
+                if (stats.averagePerDay < 2) {
+                    recommendations.push({
+                        icon: 'target',
+                        title: 'Increase Daily Goals',
+                        message: 'Try to complete at least 2-3 tasks per day to boost productivity.'
+                    });
+                }
+                
+                if (stats.consistency < 70) {
+                    recommendations.push({
+                        icon: 'calendar-plus',
+                        title: 'Improve Consistency',
+                        message: 'Focus on completing tasks every day, even if it\'s just one task.'
+                    });
+                }
+                
+                recommendations.push({
+                    icon: 'chart-line',
+                    title: 'Track Progress',
+                    message: 'Regularly review your analytics to identify patterns and improve.'
+                });
+            }
+
+            return recommendations;
+        }
+
+        // Update insights and recommendations
+        function updateInsightsAndRecommendations() {
+            const stats = calculateStats();
+            const insights = generateInsights(stats);
+            const recommendations = generateRecommendations(stats);
+
+            // Update insights
+            const insightsContainer = document.getElementById('insights');
+            insightsContainer.innerHTML = insights.map(insight => `
+                <div class="alert alert-${insight.type} mb-2">
+                    <i class="fas fa-${insight.icon} me-2"></i>
+                    <strong>${insight.title}</strong><br>
+                    ${insight.message}
+                </div>
+            `).join('');
+
+            // Update recommendations
+            const recommendationsContainer = document.getElementById('recommendations');
+            recommendationsContainer.innerHTML = recommendations.map(rec => `
+                <div class="d-flex align-items-start mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${rec.icon} text-primary fa-lg me-3"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${rec.title}</h6>
+                        <p class="text-muted mb-0 small">${rec.message}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Chart view functions
+        function showWeeklyChart() {
+            // This would load weekly data - for now, we're already showing weekly
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showMonthlyChart() {
+            // This would load monthly data - placeholder for future enhancement
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            alert('Monthly view coming soon!');
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChart();
+            updateInsightsAndRecommendations();
+        });
+    </script>
+</body>
+</html>  
+solve error 

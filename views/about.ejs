@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - ProTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('_navbar') %>
+    
+    <main>
+        <!-- About Hero Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-4">
+                        <i class="fas fa-info-circle me-3"></i>
+                        About ProTrack
+                    </h1>
+                    <p class="lead">
+                        Empowering individuals and teams to achieve their productivity goals through intelligent task management and analytics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-5">
+                            <h2 class="fw-bold text-dark mb-4">Our Mission</h2>
+                            <p class="lead text-muted mb-4">
+                                ProTrack is a full-stack productivity web app that helps users track tasks, 
+                                visualize productivity trends, and stay consistent with their goals.
+                            </p>
+                            
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                            <i class="fas fa-target"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold">Goal-Oriented</h5>
+                                            <p class="text-muted mb-0">Focus on what matters most with priority-based task management.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-success bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold">Data-Driven</h5>
+                                            <p class="text-muted mb-0">Make informed decisions with comprehensive analytics and insights.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-info bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold">User-Friendly</h5>
+                                            <p class="text-muted mb-0">Intuitive interface designed for seamless productivity tracking.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-warning bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold">Secure & Reliable</h5>
+                                            <p class="text-muted mb-0">Your data is protected with enterprise-grade security measures.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3 class="fw-bold text-dark mb-4">Key Features</h3>
+                            <div class="row g-3 mb-5">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Task creation and management
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Priority-based organization
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Due date tracking
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Progress visualization
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Interactive analytics
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Custom reports generation
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Email reminders
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Mobile-responsive design
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <a href="/signup" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Get Started Today
+                                </a>
+                                <a href="/contact" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    Contact Us
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <%- include('_footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
